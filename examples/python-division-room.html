@@ -1,0 +1,728 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Division and remainders</title>
+<style>
+/* Colour preset "soft dim": mid-dark slate surfaces and soft off-white text, no pure black or white.
+   Every text pair is WCAG AA (4.5:1) or better and no pair is above 12:1. Change the tones here and keep the names. */
+:root {
+  color-scheme: dark;
+  /* Surfaces */
+  --cf-bg: #1f2a33;
+  --cf-fg: #e2e7e4;
+  --cf-muted: #aab7bf;
+  --cf-border: #3d4e5a;
+  --cf-card: #28353f;
+  --cf-card-fg: #e2e7e4;
+  /* States, each with the soft fill behind its label */
+  --cf-ok: #7fd1a4;
+  --cf-ok-soft: #2b4a40;
+  --cf-warn: #e6c170;
+  --cf-warn-soft: #4d432c;
+  --cf-err: #f0a0ac;
+  --cf-err-soft: #553640;
+  --cf-info: #93bff0;
+  --cf-info-soft: #2e4660;
+  --cf-neutral: #aab7bf;
+  --cf-neutral-soft: #34434e;
+  /* Accents: at most three active */
+  --cf-accent-1: #6cc5d1;
+  --cf-accent-2: #b9acf0;
+  --cf-accent-3: #e8a87c;
+}
+/* Colours below use only --cf- variables. */
+
+/* Eye comfort: one soft dim scheme, text 16px and never under 13px, no large solid bright area. */
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--cf-bg); color: var(--cf-fg); font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
+h1, h2, h3, h4, p { margin: 0; }
+h1, h2 { text-wrap: balance; }
+code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 0.88em; background: var(--cf-neutral-soft); color: var(--cf-fg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+button { font: inherit; cursor: pointer; }
+button:disabled { opacity: 0.45; cursor: default; }
+mark { background: var(--cf-neutral-soft); color: inherit; font-weight: 700; padding: 0 4px; border-radius: 4px; border-bottom: 2px solid var(--cf-accent-2); }
+.emoji { font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif; font-style: normal; font-weight: 400; }
+:focus-visible { outline: 3px solid var(--cf-accent-2); outline-offset: 2px; }
+.sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+
+.band { background: var(--cf-card); color: var(--cf-card-fg); border-bottom: 1px solid var(--cf-border); }
+.band .inner, .pstrip .inner, .page { max-width: 980px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.band .inner { padding-block: 30px 28px; }
+.band .lead { border-left: 4px solid var(--cf-accent-1); padding-left: 16px; display: flex; flex-direction: column; gap: 8px; }
+.band .eyebrow { font-size: 13px; letter-spacing: 0.05em; text-transform: uppercase; font-weight: 700; color: var(--cf-accent-1); }
+.band h1 { font-size: 30px; line-height: 1.2; font-weight: 700; }
+.band p { max-width: 62ch; font-size: 17px; }
+.facts { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.facts li { border: 1px solid var(--cf-border); border-radius: 999px; padding: 3px 14px; font-size: 14px; font-weight: 600; }
+.facts b { color: var(--cf-muted); font-weight: 700; margin-right: 4px; }
+.page { padding-block: 26px 64px; display: flex; flex-direction: column; gap: 34px; }
+section { display: flex; flex-direction: column; gap: 14px; }
+h2 { font-size: 21px; font-weight: 700; }
+.note { color: var(--cf-muted); max-width: 72ch; font-size: 15px; }
+.plainbtn { border: 2px solid var(--cf-border); border-radius: 999px; padding: 8px 16px; font-size: 15px; font-weight: 600; background: var(--cf-card); color: var(--cf-card-fg); }
+.plainbtn:hover:not(:disabled) { background: var(--cf-neutral-soft); }
+.mainbtn { border: 2px solid var(--cf-accent-1); border-radius: 999px; padding: 8px 20px; font-size: 16px; font-weight: 700; background: var(--cf-card); color: var(--cf-accent-1); }
+.mainbtn:hover:not(:disabled) { background: var(--cf-neutral-soft); }
+
+/* Progress strip: stays at the top while the page scrolls. */
+.pstrip { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--cf-card); color: var(--cf-card-fg); border-bottom: 1px solid var(--cf-border); }
+.pstrip .inner { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; padding-block: 8px; }
+.pstrip .ptitle { font-size: 14px; font-weight: 700; }
+.pstrip .meter { flex: 1 1 120px; max-width: none; }
+.pstrip .ppct { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 3.2em; }
+.pstrip .pcount { font-size: 14px; font-weight: 600; color: var(--cf-muted); font-variant-numeric: tabular-nums; }
+
+.plain { background: var(--cf-card); color: var(--cf-card-fg); border: 2px solid var(--cf-accent-2); border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px; }
+.plain .tag { color: var(--cf-accent-2); font-size: 13px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+.plain p { font-size: 18px; line-height: 1.55; max-width: 66ch; }
+
+/* Tasks: an accordion. Each header is a button; the body is shown or hidden with the hidden attribute. */
+.tasks { display: flex; flex-direction: column; gap: 12px; }
+.task { background: var(--cf-card); color: var(--cf-card-fg); border: 1px solid var(--cf-border); border-radius: 14px; scroll-margin-top: 84px; overflow: hidden; }
+.task.is-done { border-color: var(--cf-ok); }
+.task .thead { margin: 0; font-size: inherit; }
+.tbtn { width: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; min-height: 52px; padding: 12px 16px; border: 0; background: var(--cf-card); color: var(--cf-card-fg); text-align: left; }
+.tbtn:hover { background: var(--cf-neutral-soft); }
+.tbtn:focus-visible { outline-offset: -3px; }
+.tnum { font-size: 13px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--cf-muted); min-width: 4.4em; }
+.tname { flex: 1 1 160px; font-size: 19px; line-height: 1.3; font-weight: 700; }
+.chev { font-size: 18px; color: var(--cf-muted); transition: transform 0.15s ease; }
+.tbtn[aria-expanded="true"] .chev { transform: rotate(90deg); }
+.tbody { padding: 4px 18px 18px; display: flex; flex-direction: column; gap: 14px; border-top: 1px solid var(--cf-border); }
+.tbody > p, .tbody > ul { max-width: 68ch; }
+.tbody ul { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 4px; }
+.qhead { font-size: 17px; font-weight: 700; margin-top: 6px; }
+.label { font-size: 13px; font-weight: 700; border-radius: 999px; padding: 3px 11px; white-space: nowrap; }
+.label.ok { background: var(--cf-ok-soft); color: var(--cf-ok); }
+.label.err { background: var(--cf-err-soft); color: var(--cf-err); }
+.label.info { background: var(--cf-info-soft); color: var(--cf-info); }
+.label.neutral { background: var(--cf-neutral-soft); color: var(--cf-muted); }
+
+/* Commands the learner types in their own terminal. No copy button on purpose. */
+.cmdblk { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.cmdcap { font-size: 13px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--cf-muted); }
+pre.cmd { margin: 0; font: 15px/1.5 ui-monospace, "Cascadia Mono", Consolas, monospace; white-space: pre; overflow-x: auto; background: var(--cf-bg); color: var(--cf-fg); border: 1px solid var(--cf-border); border-left: 4px solid var(--cf-accent-1); border-radius: 8px; padding: 10px 12px; }
+
+/* Questions: a typed answer, or a no-answer question with a Complete button. A result is always a text label. */
+.q { background: var(--cf-bg); color: var(--cf-fg); border: 1px solid var(--cf-border); border-radius: 12px; padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.qtext { font-size: 17px; font-weight: 600; line-height: 1.5; }
+.qid { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 13px; font-weight: 700; color: var(--cf-accent-1); margin-right: 8px; }
+.qrow { margin: 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.ans { flex: 1 1 200px; min-width: 0; max-width: 360px; font: inherit; font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; padding: 8px 12px; border: 2px solid var(--cf-border); border-radius: 8px; background: var(--cf-card); color: var(--cf-card-fg); }
+.ans::placeholder { color: var(--cf-muted); opacity: 1; }
+.q.is-done .ans { border-color: var(--cf-ok); }
+.q.is-wrong .ans { border-color: var(--cf-err); }
+.noans { font-size: 15px; font-weight: 600; color: var(--cf-muted); }
+.fb { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 15px; }
+.fb:empty { display: none; }
+.problem { color: var(--cf-err); font-size: 15px; font-weight: 600; }
+.why { border-left: 4px solid var(--cf-accent-2); padding-left: 12px; font-size: 16px; }
+.left { text-align: center; }
+
+/* Study flashcards: the question is on the front; selecting the card turns it to show the answer. */
+.deck { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
+.flash { text-align: left; min-height: 150px; display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 14px; border: 1px solid var(--cf-border); background: var(--cf-card); color: var(--cf-card-fg); transition: border-color 0.15s ease; }
+.flash:hover { border-color: var(--cf-muted); }
+.flash .side { font-size: 13px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--cf-muted); }
+.flash .fq, .flash .fa { font-size: 17px; line-height: 1.5; }
+.flash .fq { font-weight: 700; }
+.flash .hint { margin-top: auto; font-size: 14px; font-weight: 600; color: var(--cf-accent-1); }
+.flash[aria-pressed="true"] { border: 2px solid var(--cf-accent-2); background: var(--cf-neutral-soft); color: var(--cf-fg); padding: 15px; }
+.decktools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.seen { font-size: 14px; font-weight: 600; color: var(--cf-muted); font-variant-numeric: tabular-nums; }
+
+/* Practical checklist: remembers ticks on this device. */
+.todo { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.tbody .todo { padding: 0; }
+.todo label { display: grid; grid-template-columns: 22px 1fr; gap: 12px; align-items: start; background: var(--cf-bg); color: var(--cf-fg); border: 1px solid var(--cf-border); border-radius: 12px; padding: 12px 14px; cursor: pointer; }
+.todo input { width: 20px; height: 20px; margin: 3px 0 0; accent-color: var(--cf-ok); }
+.todo input:checked + span { color: var(--cf-muted); text-decoration: line-through; }
+.progress { font-weight: 700; color: var(--cf-info); }
+
+/* Result */
+.result { background: var(--cf-card); color: var(--cf-card-fg); border: 2px solid var(--cf-accent-1); border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; }
+.result .score { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+.result .score b { font-size: 34px; line-height: 1.1; font-weight: 700; font-variant-numeric: tabular-nums; }
+.meter { height: 8px; border-radius: 999px; background: var(--cf-neutral-soft); overflow: hidden; max-width: 420px; }
+.meter span { display: block; height: 100%; width: 0; background: var(--cf-ok); border-radius: 999px; transition: width 0.3s ease; }
+.resultline { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: start; }
+.resultline pre { margin: 0; font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; background: var(--cf-bg); color: var(--cf-fg); border: 1px solid var(--cf-border); border-radius: 8px; padding: 8px 10px; min-width: 0; }
+.copy { border: 2px solid var(--cf-accent-1); border-radius: 8px; padding: 4px 12px; font-size: 14px; font-weight: 700; background: var(--cf-card); color: var(--cf-accent-1); }
+.foot { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px; border-top: 1px solid var(--cf-border); padding-top: 18px; }
+@media (max-width: 620px) {
+  .band h1 { font-size: 25px; }
+  .deck { grid-template-columns: 1fr; }
+  .resultline { grid-template-columns: 1fr; }
+  .tbody { padding: 4px 14px 16px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<div class="band"><div class="inner"><div class="lead">
+  <span class="eyebrow">Python basics · PY-1.1 · example room</span>
+  <h1>Division and remainders</h1>
+  <p>After this room you can split a number into whole parts and a remainder, and use it to turn seconds into minutes and seconds.</p>
+  <ul class="facts" aria-label="Room facts">
+    <li><b>Level</b> Beginner</li>
+    <li><b>Time</b> About 20 minutes</li>
+    <li><b>Tasks</b> <span id="fact-tasks"></span></li>
+  </ul>
+</div></div></div>
+
+<div class="pstrip" id="pstrip"><div class="inner">
+  <span class="ptitle">Room progress</span>
+  <div class="meter" aria-hidden="true"><span id="p-meter"></span></div>
+  <span class="ppct" id="p-pct">0%</span>
+  <span class="pcount" id="p-count" aria-live="polite">0 of 0 questions answered</span>
+</div></div>
+
+<div class="page" id="room" data-lesson="PY-1.1" data-pass="80">
+
+  <section aria-label="In simple terms">
+    <div class="plain">
+      <span class="tag"><span class="emoji" aria-hidden="true">💡</span> In simple terms</span>
+      <p>Sharing 17 sweets among 5 friends gives each friend 3, with 2 left over. Python has one operator for the <mark>whole part</mark> and one for the <mark>left over</mark>.</p>
+    </div>
+  </section>
+
+  <section aria-label="Tasks">
+    <h2><span class="emoji" aria-hidden="true">🧭</span> Tasks</h2>
+    <div class="tasks" id="tasks">
+
+      <article class="task" id="task-1">
+        <h3 class="thead"><button type="button" class="tbtn" id="task-1-btn" aria-expanded="true" aria-controls="task-1-body">
+          <span class="tnum">Task 1</span>
+          <span class="tname"><span class="emoji" aria-hidden="true">👋</span> Get ready</span>
+          <span class="label neutral tstate">○ Open</span>
+          <span class="chev" aria-hidden="true">▸</span>
+        </button></h3>
+        <div class="tbody" id="task-1-body" role="region" aria-labelledby="task-1-btn">
+          <p>You will type every line yourself in the <mark>Python prompt</mark>. Open a terminal and start Python. On Windows the command may be <code>py</code> instead of <code>python3</code>.</p>
+          <div class="cmdblk">
+            <span class="cmdcap">Type it yourself</span>
+            <pre class="cmd" tabindex="0">python3</pre>
+          </div>
+          <p>The prompt changes to <code>&gt;&gt;&gt;</code>. Everything below is typed after it.</p>
+          <h4 class="qhead">Answer the questions below</h4>
+          <div class="q" id="t1q1" data-answer="">
+            <p class="qtext"><span class="qid"></span>Start Python and wait at the <code>&gt;&gt;&gt;</code> prompt.</p>
+            <div class="qrow">
+              <span class="noans">No answer needed</span>
+              <button type="button" class="mainbtn complete">Complete</button>
+            </div>
+            <div class="fb" aria-live="polite"></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="task" id="task-2">
+        <h3 class="thead"><button type="button" class="tbtn" id="task-2-btn" aria-expanded="false" aria-controls="task-2-body">
+          <span class="tnum">Task 2</span>
+          <span class="tname"><span class="emoji" aria-hidden="true">➗</span> Two kinds of division</span>
+          <span class="label neutral tstate">○ Open</span>
+          <span class="chev" aria-hidden="true">▸</span>
+        </button></h3>
+        <div class="tbody" id="task-2-body" role="region" aria-labelledby="task-2-btn" hidden>
+          <p>Before you type: what do you think <code>7 / 2</code> prints? Say it to yourself, then check.</p>
+          <p>A single slash is <mark>true division</mark> and keeps the fraction. A double slash is <mark>floor division</mark> and keeps only the whole part.</p>
+          <div class="cmdblk">
+            <span class="cmdcap">Type it yourself</span>
+            <pre class="cmd" tabindex="0">7 / 2
+17 // 5</pre>
+          </div>
+          <h4 class="qhead">Answer the questions below</h4>
+          <div class="q" id="t2q1" data-answer="3.5" data-format="*.*" data-hint="It keeps the part after the point.">
+            <p class="qtext"><span class="qid"></span>What does <code>7 / 2</code> print?</p>
+            <form class="qrow" novalidate>
+              <label class="sr" for="t2q1-in">Result of seven divided by two</label>
+              <input type="text" class="ans" id="t2q1-in" autocomplete="off" autocapitalize="off" spellcheck="false">
+              <button type="submit" class="mainbtn">Submit</button>
+              <button type="button" class="plainbtn hintbtn">Hint</button>
+            </form>
+            <p class="why hinttext" hidden></p>
+            <div class="fb" aria-live="polite"></div>
+          </div>
+          <div class="q" id="t2q2" data-answer="3" data-format="*" data-hint="How many whole fives fit in seventeen?">
+            <p class="qtext"><span class="qid"></span>What does <code>17 // 5</code> print?</p>
+            <form class="qrow" novalidate>
+              <label class="sr" for="t2q2-in">Result of seventeen floor-divided by five</label>
+              <input type="text" class="ans" id="t2q2-in" autocomplete="off" autocapitalize="off" spellcheck="false">
+              <button type="submit" class="mainbtn">Submit</button>
+              <button type="button" class="plainbtn hintbtn">Hint</button>
+            </form>
+            <p class="why hinttext" hidden></p>
+            <div class="fb" aria-live="polite"></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="task" id="task-3">
+        <h3 class="thead"><button type="button" class="tbtn" id="task-3-btn" aria-expanded="false" aria-controls="task-3-body">
+          <span class="tnum">Task 3</span>
+          <span class="tname"><span class="emoji" aria-hidden="true">🧩</span> The left over</span>
+          <span class="label neutral tstate">○ Open</span>
+          <span class="chev" aria-hidden="true">▸</span>
+        </button></h3>
+        <div class="tbody" id="task-3-body" role="region" aria-labelledby="task-3-btn" hidden>
+          <p>The percent sign is the <mark>remainder</mark> operator: what is left after the whole parts are taken out. <code>divmod</code> gives both at once.</p>
+          <p>Predict first: floor division rounds <mark>down</mark>, not towards zero. What should <code>-7 // 2</code> be?</p>
+          <div class="cmdblk">
+            <span class="cmdcap">Type it yourself</span>
+            <pre class="cmd" tabindex="0">17 % 5
+divmod(17, 5)
+-7 // 2</pre>
+          </div>
+          <h4 class="qhead">Answer the questions below</h4>
+          <div class="q" id="t3q1" data-answer="2" data-format="*" data-hint="Seventeen minus the fives you took out.">
+            <p class="qtext"><span class="qid"></span>What does <code>17 % 5</code> print?</p>
+            <form class="qrow" novalidate>
+              <label class="sr" for="t3q1-in">Remainder of seventeen by five</label>
+              <input type="text" class="ans" id="t3q1-in" autocomplete="off" autocapitalize="off" spellcheck="false">
+              <button type="submit" class="mainbtn">Submit</button>
+              <button type="button" class="plainbtn hintbtn">Hint</button>
+            </form>
+            <p class="why hinttext" hidden></p>
+            <div class="fb" aria-live="polite"></div>
+          </div>
+          <div class="q" id="t3q2" data-answer="(3, 2)||(3,2)" data-format="(*, *)">
+            <p class="qtext"><span class="qid"></span>What does <code>divmod(17, 5)</code> print? Type it exactly, brackets included.</p>
+            <form class="qrow" novalidate>
+              <label class="sr" for="t3q2-in">Result of divmod seventeen five</label>
+              <input type="text" class="ans" id="t3q2-in" autocomplete="off" autocapitalize="off" spellcheck="false">
+              <button type="submit" class="mainbtn">Submit</button>
+              <button type="button" class="plainbtn hintbtn">Hint</button>
+            </form>
+            <p class="why hinttext" hidden></p>
+            <div class="fb" aria-live="polite"></div>
+          </div>
+          <div class="q" id="t3q3" data-answer="-4" data-format="-*" data-hint="On a number line, down from -3.5 is further from zero.">
+            <p class="qtext"><span class="qid"></span>What does <code>-7 // 2</code> print?</p>
+            <form class="qrow" novalidate>
+              <label class="sr" for="t3q3-in">Result of minus seven floor-divided by two</label>
+              <input type="text" class="ans" id="t3q3-in" autocomplete="off" autocapitalize="off" spellcheck="false">
+              <button type="submit" class="mainbtn">Submit</button>
+              <button type="button" class="plainbtn hintbtn">Hint</button>
+            </form>
+            <p class="why hinttext" hidden></p>
+            <div class="fb" aria-live="polite"></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="task" id="task-4">
+        <h3 class="thead"><button type="button" class="tbtn" id="task-4-btn" aria-expanded="false" aria-controls="task-4-body">
+          <span class="tnum">Task 4</span>
+          <span class="tname"><span class="emoji" aria-hidden="true">⏱️</span> Practical: a timer label</span>
+          <span class="label neutral tstate">○ Open</span>
+          <span class="chev" aria-hidden="true">▸</span>
+        </button></h3>
+        <div class="tbody" id="task-4-body" role="region" aria-labelledby="task-4-btn" hidden>
+          <p>A real use: a timer shows seconds as minutes and seconds, like <code>1:30</code> for 90 seconds. Your timer has run for 125 seconds. Nothing on your computer is changed; you only type in the Python prompt.</p>
+          <p class="progress" id="progress" aria-live="polite"></p>
+          <div class="meter" aria-hidden="true"><span id="meter"></span></div>
+          <ul class="todo" id="todo">
+            <li><label><input type="checkbox" id="todo-1"><span>Type <code>m, s = divmod(125, 60)</code> to split 125 seconds.</span></label></li>
+            <li><label><input type="checkbox" id="todo-2"><span>Type <code>f"{m}:{s:02d}"</code> to build the label.</span></label></li>
+            <li><label><input type="checkbox" id="todo-3"><span>Try it with your own number of seconds.</span></label></li>
+          </ul>
+          <h4 class="qhead">Answer the questions below</h4>
+          <div class="q" id="t4q1" data-answer="2" data-format="*">
+            <p class="qtext"><span class="qid"></span>After <code>m, s = divmod(125, 60)</code>, what is <code>m</code>?</p>
+            <form class="qrow" novalidate>
+              <label class="sr" for="t4q1-in">Value of m</label>
+              <input type="text" class="ans" id="t4q1-in" autocomplete="off" autocapitalize="off" spellcheck="false">
+              <button type="submit" class="mainbtn">Submit</button>
+              <button type="button" class="plainbtn hintbtn">Hint</button>
+            </form>
+            <p class="why hinttext" hidden></p>
+            <div class="fb" aria-live="polite"></div>
+          </div>
+          <div class="q" id="t4q2" data-answer="'2:05'||2:05" data-format="'*:**'" data-hint="The :02d part pads the seconds to two digits.">
+            <p class="qtext"><span class="qid"></span>What does <code>f"{m}:{s:02d}"</code> print?</p>
+            <form class="qrow" novalidate>
+              <label class="sr" for="t4q2-in">The timer label</label>
+              <input type="text" class="ans" id="t4q2-in" autocomplete="off" autocapitalize="off" spellcheck="false">
+              <button type="submit" class="mainbtn">Submit</button>
+              <button type="button" class="plainbtn hintbtn">Hint</button>
+            </form>
+            <p class="why hinttext" hidden></p>
+            <div class="fb" aria-live="polite"></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="task" id="task-5">
+        <h3 class="thead"><button type="button" class="tbtn" id="task-5-btn" aria-expanded="false" aria-controls="task-5-body">
+          <span class="tnum">Task 5</span>
+          <span class="tname"><span class="emoji" aria-hidden="true">🧠</span> Recap</span>
+          <span class="label neutral tstate">○ Open</span>
+          <span class="chev" aria-hidden="true">▸</span>
+        </button></h3>
+        <div class="tbody" id="task-5-body" role="region" aria-labelledby="task-5-btn" hidden>
+          <p class="note">Say the answer to yourself first, then select the card to turn it.</p>
+          <div class="decktools">
+            <button type="button" class="plainbtn" id="deck-reset">Turn all back</button>
+            <span class="seen" id="deck-seen" aria-live="polite"></span>
+          </div>
+          <div class="deck" id="deck">
+            <button type="button" class="flash" aria-pressed="false"><span class="side">Question</span><span class="fq">What is the difference between / and //?</span><span class="fa" hidden>/ keeps the fraction; // keeps only the whole part, rounded down.</span><span class="hint">Turn the card</span></button>
+            <button type="button" class="flash" aria-pressed="false"><span class="side">Question</span><span class="fq">What does % give you?</span><span class="fa" hidden>The remainder: what is left after the whole parts are taken out.</span><span class="hint">Turn the card</span></button>
+            <button type="button" class="flash" aria-pressed="false"><span class="side">Question</span><span class="fq">What does divmod(a, b) return?</span><span class="fa" hidden>Both at once, as a pair: (a // b, a % b).</span><span class="hint">Turn the card</span></button>
+            <button type="button" class="flash" aria-pressed="false"><span class="side">Question</span><span class="fq">Why is -7 // 2 equal to -4 and not -3?</span><span class="fa" hidden>Floor division rounds down, towards minus infinity, not towards zero.</span><span class="hint">Turn the card</span></button>
+            <button type="button" class="flash" aria-pressed="false"><span class="side">Question</span><span class="fq">How do you split seconds into minutes and seconds?</span><span class="fa" hidden>divmod(seconds, 60) gives the minutes and the seconds left over.</span><span class="hint">Turn the card</span></button>
+            <button type="button" class="flash" aria-pressed="false"><span class="side">Question</span><span class="fq">What does :02d do inside an f-string?</span><span class="fa" hidden>It writes a whole number with at least two digits, padding with a zero.</span><span class="hint">Turn the card</span></button>
+          </div>
+          <h4 class="qhead">Answer the questions below</h4>
+          <div class="q" id="t5q1" data-answer="">
+            <p class="qtext"><span class="qid"></span>Turn every card at least once.</p>
+            <div class="qrow">
+              <span class="noans">No answer needed</span>
+              <button type="button" class="mainbtn complete">Complete</button>
+            </div>
+            <div class="fb" aria-live="polite"></div>
+          </div>
+        </div>
+      </article>
+    </div>
+    <p class="note left" id="left" aria-live="polite"></p>
+  </section>
+
+  <section aria-label="Result">
+    <div class="result" id="result" hidden aria-live="polite">
+      <h2><span class="emoji" aria-hidden="true">🏁</span> Room complete</h2>
+      <div class="score"><b id="score-num"></b><span class="label" id="score-label"></span></div>
+      <div class="meter" aria-hidden="true"><span id="score-meter"></span></div>
+      <p id="score-text"></p>
+      <p id="score-hints"></p>
+      <p class="note">Copy this line and paste it into the chat, so the result can be recorded.</p>
+      <div class="resultline"><pre id="result-line"></pre><button type="button" class="copy" data-copy="result-line">Copy</button></div>
+    </div>
+  </section>
+
+  <section class="foot" aria-label="Reset">
+    <button type="button" class="plainbtn" id="reset">Reset room</button>
+    <button type="button" class="plainbtn" id="reset-cancel" hidden>Cancel</button>
+    <span class="note">Clears your answers and ticks for this room on this device.</span>
+  </section>
+</div>
+
+<script>
+(function () {
+  var store = {
+    get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+    del: function (k) { try { localStorage.removeItem(k); } catch (e) {} }
+  };
+  var all = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
+  var byId = function (id) { return document.getElementById(id); };
+  var room = byId('room');
+  if (!room) return;
+  var lesson = room.getAttribute('data-lesson') || 'unknown';
+  var pass = Number(room.getAttribute('data-pass')) || 80;
+  var key = 'socrates-room:' + document.title + ':';
+  var state = { q: {}, todo: {} };
+  try {
+    var raw = store.get(key + 'state');
+    var parsed = raw ? JSON.parse(raw) : null;
+    if (parsed && typeof parsed === 'object') { state.q = parsed.q || {}; state.todo = parsed.todo || {}; }
+  } catch (e) {}
+  var save = function () { store.set(key + 'state', JSON.stringify(state)); };
+  var norm = function (s) { return String(s).replace(/\s+/g, ' ').trim().toLowerCase(); };
+  var calm = function () { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
+  var makeLabel = function (kind, symbol, text) {
+    var l = document.createElement('span');
+    l.className = 'label ' + kind;
+    var s = document.createElement('span');
+    s.setAttribute('aria-hidden', 'true');
+    s.textContent = symbol + ' ';
+    l.appendChild(s);
+    l.appendChild(document.createTextNode(text));
+    return l;
+  };
+  var recOf = function (q) {
+    if (!state.q[q.id]) state.q[q.id] = { done: 0, first: 0, tries: 0, hint: 0, val: '' };
+    return state.q[q.id];
+  };
+
+  /* Tasks and questions. Numbers come from the order on the page. */
+  var tasks = all('.task', room).map(function (el, ti) {
+    var t = { el: el, n: ti + 1, btn: el.querySelector('.tbtn'), body: el.querySelector('.tbody'),
+              state: el.querySelector('.tstate'), done: false, qs: [] };
+    el.querySelector('.tnum').textContent = 'Task ' + t.n;
+    all('.q', t.body).forEach(function (qel, qi) {
+      var rawAnswer = qel.getAttribute('data-answer');
+      var q = { el: qel, task: t, id: 'T' + t.n + '-Q' + (qi + 1), typed: !!rawAnswer, answers: [],
+                form: qel.querySelector('form'), input: qel.querySelector('.ans'),
+                hintBtn: qel.querySelector('.hintbtn'), hintText: qel.querySelector('.hinttext'),
+                complete: qel.querySelector('.complete'), fb: qel.querySelector('.fb'),
+                hint: qel.getAttribute('data-hint') || '' };
+      qel.querySelector('.qid').textContent = q.id;
+      if (q.typed) q.answers = rawAnswer.split('||').map(norm);
+      if (q.input) q.input.placeholder = qel.getAttribute('data-format') || '';
+      if (q.hintBtn && !q.hint) q.hintBtn.hidden = true;
+      t.qs.push(q);
+    });
+    return t;
+  });
+  var factTasks = byId('fact-tasks');
+  if (factTasks) factTasks.textContent = String(tasks.length);
+
+  var setOpen = function (t, on) {
+    t.btn.setAttribute('aria-expanded', String(on));
+    t.body.hidden = !on;
+  };
+  tasks.forEach(function (t) {
+    t.btn.addEventListener('click', function () { setOpen(t, t.btn.getAttribute('aria-expanded') !== 'true'); });
+  });
+
+  var renderQ = function (q) {
+    var rec = state.q[q.id];
+    q.fb.textContent = '';
+    q.el.classList.remove('is-done', 'is-wrong');
+    if (q.hintText) {
+      if (rec && rec.hint && q.hint) { q.hintText.textContent = 'Hint: ' + q.hint; q.hintText.hidden = false; }
+      else { q.hintText.textContent = ''; q.hintText.hidden = true; }
+    }
+    if (rec && rec.done) {
+      q.el.classList.add('is-done');
+      if (q.typed) {
+        q.input.value = rec.val;
+        q.input.readOnly = true;
+        q.form.querySelector('[type="submit"]').disabled = true;
+        if (q.hintBtn) q.hintBtn.disabled = true;
+        q.fb.appendChild(makeLabel('ok', '✓', 'Correct'));
+      } else {
+        q.complete.disabled = true;
+        q.fb.appendChild(makeLabel('ok', '✓', 'Completed'));
+      }
+    } else if (q.typed) {
+      q.input.value = '';
+      q.input.readOnly = false;
+      q.form.querySelector('[type="submit"]').disabled = false;
+      if (q.hintBtn) q.hintBtn.disabled = false;
+    } else {
+      q.complete.disabled = false;
+    }
+  };
+
+  var wireQ = function (q) {
+    if (q.typed) {
+      q.form.addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        var rec = recOf(q);
+        if (rec.done) return;
+        var typed = q.input.value;
+        if (!norm(typed)) {
+          q.fb.textContent = '';
+          var p = document.createElement('span');
+          p.className = 'problem';
+          p.textContent = 'Type an answer first.';
+          q.fb.appendChild(p);
+          return;
+        }
+        rec.tries++;
+        if (q.answers.indexOf(norm(typed)) > -1) {
+          rec.done = 1;
+          rec.first = rec.tries === 1 ? 1 : 0;
+          rec.val = typed.replace(/\s+/g, ' ').trim();
+          save();
+          renderQ(q);
+          refresh(true);
+        } else {
+          save();
+          q.fb.textContent = '';
+          q.el.classList.add('is-wrong');
+          q.fb.appendChild(makeLabel('err', '✗', 'Not yet'));
+          var again = document.createElement('span');
+          again.textContent = 'Try again.';
+          q.fb.appendChild(again);
+          q.input.focus();
+        }
+      });
+      q.input.addEventListener('input', function () {
+        if (q.fb.querySelector('.problem')) q.fb.textContent = '';
+      });
+      if (q.hintBtn && q.hint) {
+        q.hintBtn.addEventListener('click', function () {
+          var rec = recOf(q);
+          if (rec.done) return;
+          rec.hint = 1;
+          save();
+          q.hintText.textContent = 'Hint: ' + q.hint;
+          q.hintText.hidden = false;
+        });
+      }
+    } else if (q.complete) {
+      q.complete.addEventListener('click', function () {
+        var rec = recOf(q);
+        if (rec.done) return;
+        rec.done = 1;
+        save();
+        renderQ(q);
+        refresh(true);
+      });
+    }
+  };
+
+  var left = byId('left');
+  var result = byId('result');
+  var wasComplete = false;
+  var firstOpen = function () {
+    var i;
+    for (i = 0; i < tasks.length; i++) { if (!tasks[i].done) return tasks[i]; }
+    return null;
+  };
+  var openNext = function (t) {
+    var next = null;
+    var i;
+    for (i = t.n; i < tasks.length; i++) { if (!tasks[i].done) { next = tasks[i]; break; } }
+    if (!next) next = firstOpen();
+    if (!next) return;
+    setOpen(next, true);
+    try { next.el.scrollIntoView({ block: 'start', behavior: calm() ? 'auto' : 'smooth' }); } catch (e) {}
+  };
+
+  var refresh = function (interactive) {
+    var total = 0, answered = 0, scored = 0, first = 0, hints = 0;
+    var missed = [];
+    var finished = null;
+    tasks.forEach(function (t) {
+      var n = 0;
+      t.qs.forEach(function (q) {
+        var r = state.q[q.id];
+        var done = !!(r && r.done);
+        total++;
+        if (done) { answered++; n++; }
+        if (r && r.hint) hints++;
+        if (q.typed) {
+          scored++;
+          if (done && r.first) first++;
+          else if (done) missed.push(q.id);
+        }
+      });
+      var now = n === t.qs.length;
+      if (interactive && now && !t.done) finished = t;
+      t.done = now;
+      t.state.className = 'label ' + (now ? 'ok' : 'neutral') + ' tstate';
+      t.state.textContent = now ? '✓ Done' : '○ Open';
+      t.el.classList.toggle('is-done', now);
+    });
+    var pct = total ? Math.round(100 * answered / total) : 0;
+    byId('p-meter').style.width = pct + '%';
+    byId('p-pct').textContent = pct + '%';
+    byId('p-count').textContent = answered + ' of ' + total + ' questions answered';
+    var complete = total > 0 && answered === total;
+    var rest = total - answered;
+    left.textContent = rest + (rest === 1 ? ' question left' : ' questions left');
+    left.hidden = complete;
+    result.hidden = !complete;
+    if (complete) {
+      var score = scored ? Math.round(100 * first / scored) : 100;
+      var passed = score >= pass;
+      var label = byId('score-label');
+      byId('score-num').textContent = first + ' of ' + scored;
+      label.textContent = '';
+      label.className = 'label ' + (passed ? 'ok' : 'info');
+      label.appendChild(document.createTextNode((passed ? '✓ ' : '↻ ') + (passed ? 'Passed' : 'Repeat the missed parts')));
+      byId('score-meter').style.width = score + '%';
+      byId('score-text').textContent = passed
+        ? 'That is ' + score + '% on the first try, at or above the pass mark of ' + pass + '%. The practical task still needs to be checked in the chat.'
+        : 'That is ' + score + '% on the first try, under the pass mark of ' + pass + '%. Only the missed parts are repeated.';
+      byId('score-hints').textContent = 'Hints used: ' + hints;
+      byId('result-line').textContent = 'SOCRATES RESULT | lesson ' + lesson + ' | answered ' + answered + '/' + total +
+        ' | first try ' + first + '/' + scored + ' (' + score + '%) | pass mark ' + pass + '% | ' + (passed ? 'passed' : 'not passed') +
+        ' | hints ' + hints + ' | missed first try: ' + (missed.length ? missed.join(', ') : 'none') +
+        ' | ' + new Date().toISOString().slice(0, 10);
+    }
+    if (finished && !complete) openNext(finished);
+    if (interactive && complete && !wasComplete) {
+      try { result.scrollIntoView({ block: 'nearest', behavior: calm() ? 'auto' : 'smooth' }); } catch (e) {}
+    }
+    wasComplete = complete;
+  };
+
+  /* Flashcards: turn to show the answer. */
+  var flashes = all('.flash');
+  var seen = byId('deck-seen');
+  var turn = function (card, on) {
+    card.setAttribute('aria-pressed', String(on));
+    card.querySelector('.side').textContent = on ? 'Answer' : 'Question';
+    card.querySelector('.fa').hidden = !on;
+    card.querySelector('.hint').textContent = on ? 'Turn back' : 'Turn the card';
+    if (on) card.setAttribute('data-seen', '1');
+    if (seen) seen.textContent = flashes.filter(function (c) { return c.getAttribute('data-seen'); }).length + ' of ' + flashes.length + ' turned';
+  };
+  flashes.forEach(function (card) {
+    turn(card, false);
+    card.addEventListener('click', function () { turn(card, card.getAttribute('aria-pressed') !== 'true'); });
+  });
+  var deckReset = byId('deck-reset');
+  if (deckReset) deckReset.addEventListener('click', function () { flashes.forEach(function (c) { turn(c, false); }); });
+
+  /* Practical checklist. */
+  var boxes = all('#todo input[type="checkbox"]');
+  var progress = byId('progress');
+  var count = function () {
+    if (!boxes.length) return;
+    var n = boxes.filter(function (b) { return b.checked; }).length;
+    if (progress) progress.textContent = n === boxes.length ? 'All steps ticked' : n + ' of ' + boxes.length + ' steps ticked';
+    var meter = byId('meter');
+    if (meter) meter.style.width = Math.round(100 * n / boxes.length) + '%';
+  };
+  boxes.forEach(function (box) {
+    box.addEventListener('change', function () {
+      state.todo[box.id] = box.checked ? 1 : 0;
+      save();
+      count();
+    });
+  });
+  var renderBoxes = function () {
+    boxes.forEach(function (box) { box.checked = state.todo[box.id] === 1; });
+    count();
+  };
+
+  /* Start: restore, then open the first task that is not done. */
+  tasks.forEach(function (t) { t.qs.forEach(function (q) { wireQ(q); renderQ(q); }); });
+  renderBoxes();
+  var startOpen = function () {
+    var f = firstOpen();
+    tasks.forEach(function (t) { setOpen(t, t === f); });
+  };
+  refresh(false);
+  startOpen();
+
+  /* Reset room: two steps, no dialogs. */
+  var resetBtn = byId('reset');
+  var cancelBtn = byId('reset-cancel');
+  var armed = false;
+  var disarm = function () { armed = false; resetBtn.textContent = 'Reset room'; cancelBtn.hidden = true; };
+  resetBtn.addEventListener('click', function () {
+    if (!armed) { armed = true; resetBtn.textContent = 'Reset: are you sure?'; cancelBtn.hidden = false; return; }
+    state = { q: {}, todo: {} };
+    store.del(key + 'state');
+    tasks.forEach(function (t) { t.qs.forEach(renderQ); });
+    renderBoxes();
+    flashes.forEach(function (c) { c.removeAttribute('data-seen'); turn(c, false); });
+    refresh(false);
+    startOpen();
+    disarm();
+    try { window.scrollTo(0, 0); } catch (e) {}
+  });
+  cancelBtn.addEventListener('click', disarm);
+
+  all('.copy').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var el = byId(btn.getAttribute('data-copy'));
+      var done = function () { btn.textContent = 'Copied'; setTimeout(function () { btn.textContent = 'Copy'; }, 1500); };
+      var select = function () { var r = document.createRange(); r.selectNodeContents(el); var s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = 'Selected'; };
+      try { navigator.clipboard.writeText(el.textContent).then(done, select); } catch (e) { select(); }
+    });
+  });
+})();
+</script>
+</body>
+</html>
